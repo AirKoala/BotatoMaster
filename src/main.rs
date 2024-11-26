@@ -5,6 +5,9 @@ use serenity::async_trait;
 use serenity::model::gateway::Ready;
 use serenity::prelude::*;
 
+mod message_matcher;
+use message_matcher::MessageMatcherHandler;
+
 struct MainHandler;
 
 #[async_trait]
@@ -24,6 +27,7 @@ async fn main() {
 
     let mut client = Client::builder(&token, intents)
         .event_handler(MainHandler)
+        .event_handler(MessageMatcherHandler::new())
         .await
         .expect("Err creating client");
 
