@@ -1,4 +1,3 @@
-use dotenv::dotenv;
 use std::env;
 
 use serenity::async_trait;
@@ -7,6 +6,8 @@ use serenity::prelude::*;
 
 mod message_matcher;
 use message_matcher::MessageMatcherHandler;
+
+mod database;
 
 struct MainHandler;
 
@@ -19,7 +20,8 @@ impl EventHandler for MainHandler {
 
 #[tokio::main]
 async fn main() {
-    dotenv().ok();
+    dotenvy::dotenv().expect("Failed to load .env file");
+
     let token = env::var("DISCORD_TOKEN").expect("DISCORD_TOKEN env var not set.");
     let intents = GatewayIntents::GUILD_MESSAGES
         | GatewayIntents::DIRECT_MESSAGES
