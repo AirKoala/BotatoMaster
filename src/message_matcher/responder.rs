@@ -1,4 +1,4 @@
-use anyhow::Result;
+use eyre::Result;
 use rand::seq::SliceRandom;
 use serenity::{async_trait, model::channel::Message, prelude::*};
 
@@ -7,11 +7,21 @@ pub trait Responder {
     async fn respond(&self, context: &Context, message: &Message) -> Result<()>;
 }
 
+struct Response {
+    pub content: String,
+    pub bias: u64,
+}
+
 pub struct SimpleResponder {
-    responses: Vec<String>,
+    responses: Vec<Response>,
 }
 impl SimpleResponder {
-    pub fn new(responses: Vec<String>) -> Self {
+    pub fn from_tuples(responses: Vec<(String, u64)>) -> Self {
+        let responses = responses
+            .into_iter()
+            .map(|(content, bias)| Response { content, bias })
+            .collect();
+
         SimpleResponder { responses }
     }
 }
@@ -22,7 +32,8 @@ impl Responder for SimpleResponder {
         // Choose a response at random to send.
         let chosen_response = self.responses.choose(&mut rand::thread_rng()).unwrap();
 
-        message.channel_id.say(&context.http, chosen_response).await?;
+        // TODO: Implement biasing.
+        message.channel_id.say(&context.http, &chosen_response.content).await?;
 
         Ok(())
     }

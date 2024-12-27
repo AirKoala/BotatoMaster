@@ -12,24 +12,24 @@ pub struct Selector {
     guild: Option<GuildId>,
 }
 impl Selector {
-    pub fn regex(mut self, regex: Regex) -> Self {
+    pub fn regex(&mut self, regex: Regex) -> &Self {
         self.regex = Some(regex);
         self
     }
 
-    pub fn regex_str(self, regex: &str) -> Result<Self, regex::Error> {
+    pub fn regex_str(&mut self, regex: &str) -> Result<&Self, regex::Error> {
         Ok(self.regex(Regex::new(regex)?))
     }
 
-    pub fn author(mut self, author: UserId) -> Self {
+    pub fn author(&mut self, author: UserId) -> &Self {
         self.author = Some(author);
         self
     }
-    pub fn channel(mut self, channel: ChannelId) -> Self {
+    pub fn channel(&mut self, channel: ChannelId) -> &Self {
         self.channel = Some(channel);
         self
     }
-    pub fn guild(mut self, guild: GuildId) -> Self {
+    pub fn guild(&mut self, guild: GuildId) -> &Self {
         self.guild = Some(guild);
         self
     }

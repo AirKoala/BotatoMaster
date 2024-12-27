@@ -1,17 +1,21 @@
-mod matcher;
-mod responder;
-mod selector;
+pub mod matcher;
+pub mod responder;
+pub mod selector;
 
 use matcher::{load_matchers, ContentMatcher, MatchResult};
 
+use eyre::Result;
 use serenity::{async_trait, model::channel::Message, prelude::*};
+use sqlx::SqlitePool;
 
 pub struct MessageMatcherHandler {
     matchers: Vec<ContentMatcher>,
 }
 impl MessageMatcherHandler {
-    pub fn new() -> Self {
-        MessageMatcherHandler { matchers: load_matchers() }
+    pub async fn new(pool: &SqlitePool) -> Result<Self> {
+        Ok(MessageMatcherHandler {
+            matchers: load_matchers(pool).await?,
+        })
     }
 }
 

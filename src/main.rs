@@ -1,13 +1,16 @@
 use std::env;
 
+use eyre::Error;
 use serenity::async_trait;
 use serenity::model::gateway::Ready;
 use serenity::prelude::*;
 
-mod message_matcher;
-use message_matcher::MessageMatcherHandler;
+// mod message_matcher;
+// use message_matcher::MessageMatcherHandler;
 
-mod database;
+mod commands;
+
+// mod database;
 
 struct MainHandler;
 
@@ -29,7 +32,8 @@ async fn main() {
 
     let mut client = Client::builder(&token, intents)
         .event_handler(MainHandler)
-        .event_handler(MessageMatcherHandler::new())
+        // .event_handler(MessageMatcherHandler::new())
+        .framework(commands::get_framework())
         .await
         .expect("Err creating client");
 

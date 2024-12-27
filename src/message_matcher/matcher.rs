@@ -1,6 +1,10 @@
-use super::selector::Selector;
+use crate::database::models::content_matcher::fetch_all_approved_matchers;
+
 use super::responder::Responder;
+use super::selector::Selector;
+use eyre::Result;
 use serenity::{model::channel::Message, prelude::*};
+use sqlx::SqlitePool;
 
 pub enum MatchResult {
     Matched,
@@ -16,7 +20,7 @@ pub struct ContentMatcher {
 }
 
 impl ContentMatcher {
-    pub fn new(selectors: Vec<Selector>, responder:  BoxedResponder) -> Self {
+    pub fn new(selectors: Vec<Selector>, responder: BoxedResponder) -> Self {
         ContentMatcher {
             selectors,
             responder,
@@ -49,23 +53,17 @@ impl ContentMatcher {
     }
 }
 
-pub fn load_matchers() -> Vec<ContentMatcher> {
-    vec![
-        ContentMatcher::new(
-            vec![Selector::default().regex_str("hello").expect("Invalid regex")],
-            Box::new(super::responder::SimpleResponder::new(vec![
-                "Hello!".to_string(),
-                "Hi!".to_string(),
-                "Hey!".to_string(),
-            ])),
-        ),
-        ContentMatcher::new(
-            vec![Selector::default().regex_str("goodbye").expect("Invalid regex")],
-            Box::new(super::responder::SimpleResponder::new(vec![
-                "Goodbye!".to_string(),
-                "Bye!".to_string(),
-                "See you later!".to_string(),
-            ])),
-        ),
-    ]
+pub async fn load_matchers(pool: &SqlitePool) -> Result<Vec<ContentMatcher>> {
+    let mut matchers = Vec::new();
+
+    for matcher in fetch_all_approved_matchers(pool).await? {
+        let id = matcher.id;
+
+        match matcher.into_content_matcher(pool).await {
+            Ok(matcher) => matchers.push(matcher),
+            Err(error) => println!("Error loading matcher id {}: {:?}", id, error),
+        }
+    }
+
+    Ok(matchers)
 }
